@@ -45,10 +45,8 @@ object insur2 extends App{
                            )   
 	    result.show
                
-  //2. latest data validation: crosscheck if the source data is already present in target data  --check null counts      
-   spark.sql("select id from num_data where id not in (select id from hive_tab)")
-                    
-  //3. Data pre-processing  : remove unwanted columns
+                      
+  //2. Data pre-processing  : remove unwanted columns
 		
    val drpCols = Seq("Gender","Vehicle_Age","Vehicle_Damage")
    val numdf = inputfile.drop(drpCols:_*) 
@@ -56,7 +54,12 @@ object insur2 extends App{
    numdf.createOrReplaceTempView("num_data") 
    val numStatAnlse = spark.sql("select *from num_data")
   
-  
+   //3. latest data check: crosscheck if the source data is already present in target data  --check null counts      
+   val latDtata = spark.sql("select count(id) from num_data where id not in (select id from hive_tab)")
+   if(latData = 0 )
+	{ println("Data already exists") }
+   else  
+	{
    println("--------DUPLICATE ID COUNTS--------")        
    spark.sql("select id , count(id) from num_data group by id having count(id) > 1").show()
        
@@ -132,7 +135,7 @@ object insur2 extends App{
  val vehage =  inputfile.createOrReplaceTempView("temp_data")
  spark.sql("select Vehicle_Age, count(*) from temp_data where Response = 1 group by Vehicle_Age").show
                  
-             
+	}          
  spark.stop()
                
              
